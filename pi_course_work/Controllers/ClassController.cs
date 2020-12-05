@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using pi_course_work.Database.Models;
@@ -16,28 +17,28 @@ namespace pi_course_work.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class WorkerController : ControllerBase
+    public class ClassController : ControllerBase
     {
         private IUnitOfWork db;
 
-        public WorkerController(IUnitOfWork context)
+        public ClassController(IUnitOfWork context)
         {
             this.db = context;
         }
 
         [Authorize]
-        [HttpGet("WorkersData")]
-        public string GetAllWorkers()
+        [HttpGet("ClassesData")]
+        public string AddClass()
         {
             ClaimsIdentity ident = HttpContext.User.Identity as ClaimsIdentity;
             try
             {
                 int schoolId = Int32.Parse(User.Claims.Where(c => c.Type == "schoolId").Select(c => c.Value).SingleOrDefault());
-                var workers = db.SchoolWorkers.GetAll(schoolId);
+                var classes = db.Classes.GetAll(schoolId);
 
                 return JsonConvert.SerializeObject(new
                 {
-                    workers,
+                    classes,
                     HttpResults.successRequest.result,
                     HttpResults.successRequest.error
                 });
@@ -53,90 +54,66 @@ namespace pi_course_work.Controllers
         }
 
         [Authorize]
-        [HttpGet("WorkersWithoutClass")]
-        public string GetAllWorkersWithoutClass()
+        [HttpGet("ClassById")]
+        public string GetClassById(int id)
+        {
+            try
+            {
+                var schoolClass = db.Classes.Get(id);
+
+                return JsonConvert.SerializeObject(new
+                {
+                    schoolClass,
+                    HttpResults.successRequest.result,
+                    HttpResults.successRequest.error
+                });
+            }
+            catch (Exception e)
+            {
+                return JsonConvert.SerializeObject(new
+                {
+                    HttpResults.badRequest.error,
+                    HttpResults.badRequest.result
+                });
+            }
+        }
+
+        [Authorize]
+        [HttpPost("AddClass")]
+        public RequestResult AddClass([FromBody] Class newClass)
         {
             ClaimsIdentity ident = HttpContext.User.Identity as ClaimsIdentity;
+            int schoolId = Int32.Parse(User.Claims.Where(c => c.Type == "schoolId").Select(c => c.Value).SingleOrDefault());
+
+            if (!db.Classes.isExist(newClass, schoolId))
+            {
+                return HttpResults.badClassRequest;
+            }
+
             try
             {
-                int schoolId = Int32.Parse(User.Claims.Where(c => c.Type == "schoolId").Select(c => c.Value).SingleOrDefault());
-                var workers = db.SchoolWorkers.GetAllWithoutClass(schoolId);
-
-                return JsonConvert.SerializeObject(new
-                {
-                    workers,
-                    HttpResults.successRequest.result,
-                    HttpResults.successRequest.error
-                });
+                db.Classes.Add(newClass);
+                return HttpResults.successRequest;
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                return JsonConvert.SerializeObject(new
-                {
-                    HttpResults.badRequest.error,
-                    HttpResults.badRequest.result
-                });
-            }
-        }
-        
-        [Authorize]
-        [HttpGet("ClassWorkerByClass")]
-        public string GetClassWorkerByClass(int classId)
-        {
-            try
-            {
-                var classWorker = db.SchoolWorkers.GetByClassId(classId);
-
-                return JsonConvert.SerializeObject(new
-                {
-                    classWorker,
-                    HttpResults.successRequest.result,
-                    HttpResults.successRequest.error
-                });
-            }
-            catch (Exception e)
-            {
-                return JsonConvert.SerializeObject(new
-                {
-                    HttpResults.badRequest.error,
-                    HttpResults.badRequest.result
-                });
-            }
+                return HttpResults.badRequest;
+            }            
         }
 
         [Authorize]
-        [HttpPost("NewWorker")]
-        public RequestResult Post([FromBody] NewWorker newWorker)
+        [HttpDelete("RemoveClass")]
+        public RequestResult RemoveClass(int id)
         {
-            newWorker.schoolId = Int32.Parse(User.Claims.Where(c => c.Type == "schoolId").Select(c => c.Value).SingleOrDefault());
-
-            Debug.WriteLine(JsonConvert.SerializeObject(newWorker));
-
             try
             {
-                db.SchoolWorkers.Add(newWorker);
+                db.Classes.Delete(id);
                 return HttpResults.successRequest;
             }
             catch (Exception)
             {
                 return HttpResults.badRequest;
             }
-        }
-
-        [Authorize]
-        [HttpDelete("RemoveWorker")]
-        public RequestResult RemoveWorker(int id)
-        {
-            db.SchoolWorkers.Delete(id);
-            return HttpResults.successRequest;
-        }
-
-        [Authorize]
-        [HttpPut("UpdateWorker")]
-        public RequestResult UpdateWorker(UpdateWorker worker)
-        {
-            db.SchoolWorkers.Update(worker);
-            return HttpResults.successRequest;
         }
     }
 }

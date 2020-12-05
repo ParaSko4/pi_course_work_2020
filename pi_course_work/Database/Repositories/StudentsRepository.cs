@@ -1,10 +1,10 @@
 ﻿using pi_course_work.Database.Contexts;
 using pi_course_work.Database.Models;
 using pi_course_work.Database.Repositories.Interfaces;
+using pi_course_work.StaticFields;
+using StoredProcedureEFCore;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace pi_course_work.Database.Repositories
 {
@@ -17,9 +17,20 @@ namespace pi_course_work.Database.Repositories
             this.db = context;
         }
 
-        public void Add(Student item)
+        public void Add(StudentAdd student)
         {
-            throw new NotImplementedException();
+            db.LoadStoredProc("add_student")
+               .AddParam("schoolId", student.schoolId)
+               .AddParam("classId", student.classId)
+               .AddParam("name", student.name)
+               .AddParam("surname", student.surname)
+               .AddParam("middlename", student.middlename)
+               .AddParam("birthday", student.birthday)
+               .AddParam("residence", student.residence)
+               .AddParam("number", student.number)
+               .AddParam("sex", student.sex)
+               .AddParam("role", Roles.STUDENT_ROLE)
+               .ExecNonQuery();
         }
 
         public void Delete(int id)
@@ -32,9 +43,15 @@ namespace pi_course_work.Database.Repositories
             throw new NotImplementedException();
         }
 
-        public IEnumerable<Student> GetAll()
+        public List<StudentData> GetAll(int classId)
         {
-            throw new NotImplementedException();
+            List<StudentData> rows = null;
+
+            db.LoadStoredProc("get_class_students")
+               .AddParam("classId", classId)
+               .Exec(r => rows = r.ToList<StudentData>());
+
+            return rows;
         }
 
         public void Update(Student item)

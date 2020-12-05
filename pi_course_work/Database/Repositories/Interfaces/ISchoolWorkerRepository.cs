@@ -6,7 +6,8 @@ namespace pi_course_work.Database.Repositories.Interfaces
     public interface ISchoolWorkerRepository
     {
         List<WorkerData> GetAll(int schoolId);
-        SchoolWorker Get(int id);
+        List<WorkerData> GetAllWithoutClass(int schoolId);
+        WorkerData GetByClassId(int classId);
         void Add(NewWorker worker);
         void Update(UpdateWorker item);
         void Delete(int id);

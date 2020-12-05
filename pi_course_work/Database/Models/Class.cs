@@ -16,6 +16,5 @@
         public string letter { get; set; }
         public int number { get; set; }
         public int idteacher { get; set; }
-
     }
 }

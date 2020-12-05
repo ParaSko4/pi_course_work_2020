@@ -43,9 +43,15 @@ namespace pi_course_work.Database.Repositories
                 .ExecNonQuery();
         }
 
-        public SchoolWorker Get(int id)
+        public WorkerData GetByClassId(int classId)
         {
-            throw new NotImplementedException();
+            WorkerData worker = null;
+
+            db.LoadStoredProc("get_worker_by_class")
+                .AddParam("classId", classId)
+                .Exec(r => worker = r.FirstOrDefault<WorkerData>());
+
+            return worker;
         }
 
         public List<WorkerData> GetAll(int schoolId)
@@ -55,6 +61,17 @@ namespace pi_course_work.Database.Repositories
             db.LoadStoredProc("get_school_workers")
                .AddParam("schoolId", schoolId)
                .Exec(r =>  rows = r.ToList<WorkerData>());
+
+            return rows;
+        }
+
+        public List<WorkerData> GetAllWithoutClass(int schoolId)
+        {
+            List<WorkerData> rows = null;
+
+            db.LoadStoredProc("get_workers_without_class")
+               .AddParam("schoolId", schoolId)
+               .Exec(r => rows = r.ToList<WorkerData>());
 
             return rows;
         }
