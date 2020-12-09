@@ -7,7 +7,6 @@ using pi_course_work.HttpModels;
 using pi_course_work.StaticFields;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -16,26 +15,27 @@ namespace pi_course_work.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class StudentController : ControllerBase
+    public class TimeController : ControllerBase
     {
         private IUnitOfWork db;
 
-        public StudentController(IUnitOfWork context)
+        public TimeController(IUnitOfWork context)
         {
             this.db = context;
         }
 
         [Authorize]
-        [HttpGet("GetClassStudents")]
-        public string GetClassStudents(int classId)
+        [HttpGet("GetTimes")]
+        public string GetTimes()
         {
             try
             {
-                var students = db.Students.GetAll(classId);
+                int schoolId = Int32.Parse(User.Claims.Where(c => c.Type == "schoolId").Select(c => c.Value).SingleOrDefault());
+                var times = db.SchoolTime.GetAll(schoolId);
 
                 return JsonConvert.SerializeObject(new
                 {
-                    students,
+                    times,
                     HttpResults.successRequest.result,
                     HttpResults.successRequest.error
                 });
@@ -51,14 +51,14 @@ namespace pi_course_work.Controllers
         }
 
         [Authorize]
-        [HttpPost("AddStudent")]
-        public RequestResult Post([FromBody] StudentAdd student)
+        [HttpPost("AddTime")]
+        public RequestResult AddTime([FromBody] SchoolTime time)
         {
             try
             {
-                student.schoolId = Int32.Parse(User.Claims.Where(c => c.Type == "schoolId").Select(c => c.Value).SingleOrDefault());
+                time.idschool = Int32.Parse(User.Claims.Where(c => c.Type == "schoolId").Select(c => c.Value).SingleOrDefault());
 
-                db.Students.Add(student);
+                db.SchoolTime.Add(time);
                 return HttpResults.successRequest;
             }
             catch (Exception)
@@ -68,12 +68,12 @@ namespace pi_course_work.Controllers
         }
 
         [Authorize]
-        [HttpPut("UpdateStudent")]
-        public RequestResult UpdateStudent(StudentUpdate student)
-        {   
+        [HttpPut("UpdateTime")]
+        public RequestResult Put([FromBody] SchoolTime time)
+        {
             try
             {
-                db.Students.Update(student);
+                db.SchoolTime.Update(time);
                 return HttpResults.successRequest;
             }
             catch (Exception)
@@ -83,12 +83,27 @@ namespace pi_course_work.Controllers
         }
 
         [Authorize]
-        [HttpDelete("RemoveStudent")]
-        public RequestResult Delete(int personalDataId)
+        [HttpDelete("RemoveTime")]
+        public RequestResult Delete(int id)
         {
             try
             {
-                db.Students.Delete(personalDataId);
+                db.SchoolTime.Delete(id);
+                return HttpResults.successRequest;
+            }
+            catch (Exception)
+            {
+                return HttpResults.badRequest;
+            }
+        }
+
+        [Authorize]
+        [HttpDelete("RemoveAllTimes")]
+        public RequestResult DeleteAll()
+        {
+            try
+            {
+                db.SchoolTime.Delete(Int32.Parse(User.Claims.Where(c => c.Type == "schoolId").Select(c => c.Value).SingleOrDefault()));
                 return HttpResults.successRequest;
             }
             catch (Exception)

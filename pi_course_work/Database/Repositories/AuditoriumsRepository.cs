@@ -1,6 +1,7 @@
 ﻿using pi_course_work.Database.Contexts;
 using pi_course_work.Database.Models;
 using pi_course_work.Database.Repositories.Interfaces;
+using StoredProcedureEFCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,29 +18,47 @@ namespace pi_course_work.Database.Repositories
             this.db = context;
         }
 
-        public void Add(Auditorium item)
+        public void Add(Auditorium auditorium)
         {
-            throw new NotImplementedException();
+            db.LoadStoredProc("add_auditorium")
+                .AddParam("schoolId", auditorium.idschool)
+                .AddParam("name", auditorium.name)
+                .AddParam("number", auditorium.number)
+                .ExecNonQuery();
         }
 
         public void Delete(int id)
         {
-            throw new NotImplementedException();
+            db.LoadStoredProc("remove_auditorium")
+                .AddParam("id", id)
+                .ExecNonQuery();
         }
 
-        public Auditorium Get(int id)
+        public void DeleteAll(int schoolId)
         {
-            throw new NotImplementedException();
+            db.LoadStoredProc("remove_all_auditoriums")
+                .AddParam("schoolId", schoolId)
+                .ExecNonQuery();
         }
 
-        public IEnumerable<Auditorium> GetAll()
+        public List<Auditorium> GetAll(int schoolId)
         {
-            throw new NotImplementedException();
+            List<Auditorium> auditoriums = null;
+
+            db.LoadStoredProc("get_auditoriums")
+                .AddParam("schoolId", schoolId)
+                .Exec(r => auditoriums = r.ToList<Auditorium>());
+
+            return auditoriums;
         }
 
-        public void Update(Auditorium item)
+        public void Update(Auditorium auditorium)
         {
-            throw new NotImplementedException();
+            db.LoadStoredProc("update_auditorium")
+                .AddParam("auditoriumId", auditorium.id)
+                .AddParam("name", auditorium.name)
+                .AddParam("number", auditorium.number)
+                .ExecNonQuery();
         }
     }
 }

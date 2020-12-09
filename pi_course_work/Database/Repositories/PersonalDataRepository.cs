@@ -39,26 +39,26 @@ namespace pi_course_work.Database.Repositories
 
         public void Add(PersonalData item)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         public void Delete(int id)
         {
-            var item = db.personalData.Find(id);
-            if (item != null)
-            {
-                db.personalData.Remove(item);
-            }
+            //var item = db.personalData.Find(id);
+            //if (item != null)
+            //{
+            //    db.personalData.Remove(item);
+            //}
         }
 
         public PersonalData Get(int id)
         {
-            return db.personalData.Find(id);
+            return null;
         }
 
         public IEnumerable<PersonalData> GetAll()
         {
-            return db.personalData.ToList();
+            return null;
         }
 
         public void Update(PersonalData item)

@@ -7,35 +7,34 @@ using pi_course_work.HttpModels;
 using pi_course_work.StaticFields;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace pi_course_work.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class StudentController : ControllerBase
+    public class LessonController : ControllerBase
     {
         private IUnitOfWork db;
 
-        public StudentController(IUnitOfWork context)
+        public LessonController(IUnitOfWork context)
         {
             this.db = context;
         }
 
         [Authorize]
-        [HttpGet("GetClassStudents")]
-        public string GetClassStudents(int classId)
+        [HttpGet("GetLessons")]
+        public string GetAll()
         {
             try
             {
-                var students = db.Students.GetAll(classId);
+                int schoolId = Int32.Parse(User.Claims.Where(c => c.Type == "schoolId").Select(c => c.Value).SingleOrDefault());
+                var lessons = db.Lessons.GetAll(schoolId);
 
                 return JsonConvert.SerializeObject(new
                 {
-                    students,
+                    lessons,
                     HttpResults.successRequest.result,
                     HttpResults.successRequest.error
                 });
@@ -51,14 +50,14 @@ namespace pi_course_work.Controllers
         }
 
         [Authorize]
-        [HttpPost("AddStudent")]
-        public RequestResult Post([FromBody] StudentAdd student)
+        [HttpPost("AddLesson")]
+        public RequestResult Post([FromBody] Lesson lesson)
         {
             try
             {
-                student.schoolId = Int32.Parse(User.Claims.Where(c => c.Type == "schoolId").Select(c => c.Value).SingleOrDefault());
+                lesson.idschool = Int32.Parse(User.Claims.Where(c => c.Type == "schoolId").Select(c => c.Value).SingleOrDefault());
 
-                db.Students.Add(student);
+                db.Lessons.Add(lesson);
                 return HttpResults.successRequest;
             }
             catch (Exception)
@@ -68,12 +67,12 @@ namespace pi_course_work.Controllers
         }
 
         [Authorize]
-        [HttpPut("UpdateStudent")]
-        public RequestResult UpdateStudent(StudentUpdate student)
-        {   
+        [HttpPut("UpdateLesson")]
+        public RequestResult Put([FromBody] Lesson lesson)
+        {
             try
             {
-                db.Students.Update(student);
+                db.Lessons.Update(lesson);
                 return HttpResults.successRequest;
             }
             catch (Exception)
@@ -83,12 +82,27 @@ namespace pi_course_work.Controllers
         }
 
         [Authorize]
-        [HttpDelete("RemoveStudent")]
-        public RequestResult Delete(int personalDataId)
+        [HttpDelete("RemoveLesson")]
+        public RequestResult Delete(int id)
         {
             try
             {
-                db.Students.Delete(personalDataId);
+                db.Lessons.Delete(id);
+                return HttpResults.successRequest;
+            }
+            catch (Exception)
+            {
+                return HttpResults.badRequest;
+            }
+        }
+
+        [Authorize]
+        [HttpDelete("RemoveAllLesson")]
+        public RequestResult DeleteAll()
+        {
+            try
+            {
+                db.Lessons.DeleteAll(Int32.Parse(User.Claims.Where(c => c.Type == "schoolId").Select(c => c.Value).SingleOrDefault()));
                 return HttpResults.successRequest;
             }
             catch (Exception)

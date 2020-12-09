@@ -30,19 +30,31 @@ namespace pi_course_work.Database.Repositories
                .ExecNonQuery();
         }
 
+        public void Update(School school)
+        {
+            db.LoadStoredProc("update_school")
+               .AddParam("schoolId", school.id)
+               .AddParam("name", school.name)
+               .AddParam("location", school.location)
+               .ExecNonQuery();
+        }
+
         public void Delete(int id)
         {
-            throw new NotImplementedException();
+            db.LoadStoredProc("remove_school")
+               .AddParam("schoolId", id)
+               .ExecNonQuery();
         }
 
         public School Get(int id)
         {
-            throw new NotImplementedException();
-        }
+            School school = null;
 
-        public IEnumerable<School> GetAll()
-        {
-            throw new NotImplementedException();
+            db.LoadStoredProc("get_school")
+               .AddParam("schoolId", id)
+               .Exec(r => school = r.FirstOrDefault<School>());
+
+            return school;
         }
 
         public int GetSchoolId(int fatherId)
@@ -63,11 +75,6 @@ namespace pi_course_work.Database.Repositories
                    .ExecNonQuery();
 
             return Convert.ToBoolean(i.Value);
-        }
-
-        public void Update(School item)
-        {
-            throw new NotImplementedException();
         }
     }
 }

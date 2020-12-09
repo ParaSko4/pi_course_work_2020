@@ -8,7 +8,7 @@ namespace pi_course_work.Database.Repositories.Interfaces
         List<StudentData> GetAll(int classId);
         Student Get(int id);
         void Add(StudentAdd item);
-        void Update(Student item);
-        void Delete(int id);
+        void Update(StudentUpdate item);
+        void Delete(int personalDataId);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using pi_course_work.Database.Contexts;
 using pi_course_work.Database.Models;
 using pi_course_work.Database.Repositories.Interfaces;
+using StoredProcedureEFCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,29 +18,47 @@ namespace pi_course_work.Database.Repositories
             this.db = context;
         }
 
-        public void Add(SchoolTime item)
+        public void Add(SchoolTime time)
         {
-            throw new NotImplementedException();
+            db.LoadStoredProc("add_time")
+                .AddParam("schoolId", time.idschool)
+                .AddParam("period", time.period)
+                .AddParam("dayhalf", time.dayhalf)
+                .ExecNonQuery();
         }
 
         public void Delete(int id)
         {
-            throw new NotImplementedException();
+            db.LoadStoredProc("remove_time")
+                .AddParam("id", id)
+                .ExecNonQuery();
         }
 
-        public SchoolTime Get(int id)
+        public void DeleteAll(int schoolId)
         {
-            throw new NotImplementedException();
+            db.LoadStoredProc("remove_all_times")
+                .AddParam("schoolId", schoolId)
+                .ExecNonQuery();
         }
 
-        public IEnumerable<SchoolTime> GetAll()
+        public List<SchoolTime> GetAll(int schoolId)
         {
-            throw new NotImplementedException();
+            List<SchoolTime> times = null;
+
+            db.LoadStoredProc("get_times")
+                .AddParam("schoolId", schoolId)
+                .Exec(r => times = r.ToList<SchoolTime>());
+
+            return times;
         }
 
-        public void Update(SchoolTime item)
+        public void Update(SchoolTime time)
         {
-            throw new NotImplementedException();
+            db.LoadStoredProc("update_time")
+                .AddParam("timeId", time.id)
+                .AddParam("period", time.period)
+                .AddParam("dayhalf", time.dayhalf)
+                .ExecNonQuery();
         }
     }
 }

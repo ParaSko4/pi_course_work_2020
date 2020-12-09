@@ -4,6 +4,7 @@ using pi_course_work.Database.Repositories.Interfaces;
 using StoredProcedureEFCore;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -75,7 +76,7 @@ namespace pi_course_work.Database.Repositories
                 .AddParam("classId", item.id)
                 .AddParam("letter", item.letter)
                 .AddParam("number", item.number)
-                .AddParam("idteacher", item.idteacher)
+                .AddParam("teacherId", item.idteacher)
                 .ExecNonQuery();
         }
     }

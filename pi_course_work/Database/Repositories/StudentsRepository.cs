@@ -33,9 +33,11 @@ namespace pi_course_work.Database.Repositories
                .ExecNonQuery();
         }
 
-        public void Delete(int id)
+        public void Delete(int personalDataId)
         {
-            throw new NotImplementedException();
+            db.LoadStoredProc("remove_student")
+               .AddParam("personalDataId", personalDataId)
+               .ExecNonQuery();
         }
 
         public Student Get(int id)
@@ -54,9 +56,20 @@ namespace pi_course_work.Database.Repositories
             return rows;
         }
 
-        public void Update(Student item)
+        public void Update(StudentUpdate student)
         {
-            throw new NotImplementedException();
+            db.LoadStoredProc("update_student")
+                .AddParam("personalDataId", student.personalDataId)
+                .AddParam("name", student.name)
+                .AddParam("surname", student.surname)
+                .AddParam("middleName", student.middlename)
+                .AddParam("birthday", student.birthday)
+                .AddParam("residence", student.residence)
+                .AddParam("number", student.number)
+                .AddParam("sex", student.sex)
+                .AddParam("login", student.login)
+                .AddParam("password", student.password)
+                .ExecNonQuery();
         }
     }
 }

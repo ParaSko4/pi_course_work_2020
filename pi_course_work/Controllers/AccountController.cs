@@ -30,8 +30,6 @@ namespace pi_course_work.Controllers
             this.db = context;
         }
 
-        #region Authorize methods
-
         [Authorize]
         [HttpGet("me")]
         public string AccMe()
@@ -52,10 +50,6 @@ namespace pi_course_work.Controllers
                     }
                 );
         }
-
-        #endregion
-
-        #region Anonymous methods
 
         [AllowAnonymous]
         [HttpPost("login")]
@@ -127,7 +121,6 @@ namespace pi_course_work.Controllers
         {
             foreach (var cookie in HttpContext.Request.Cookies)
             {
-                Debug.WriteLine(cookie.Key);
                 Response.Cookies.Delete(cookie.Key);
             }
             return HttpResults.successRequest;
@@ -140,49 +133,5 @@ namespace pi_course_work.Controllers
             Debug.WriteLine("unauthorized");
             return HttpResults.unauthorizedRequest;
         }
-
-        #endregion
-
-        #region Help method
-
-
-        private ClaimsIdentity GetIdentity(string login, string password)
-        {
-            CRMFather father = db.CrmFathers.GetFather(login, password);
-            MemberAccount member = null;
-
-            List<Claim> claims;
-            if (father == null)
-            {
-                member = db.MembersAccounts.GetAccount(login, password);
-
-                if (member == null)
-                {
-                    return null;
-                }
-
-                claims = new List<Claim>
-                {
-                    new Claim(ClaimsIdentity.DefaultNameClaimType, member.login),
-                    new Claim(ClaimsIdentity.DefaultRoleClaimType, member.role),
-                    new Claim("id", member.id.ToString())
-                };
-            }
-            else
-            {
-                claims = new List<Claim>
-                {
-                    new Claim(ClaimsIdentity.DefaultNameClaimType, father.father),
-                    new Claim(ClaimsIdentity.DefaultRoleClaimType, "Father"),
-                    new Claim("id", father.id.ToString())
-                };
-            }
-
-            ClaimsIdentity claimsIdentity = new ClaimsIdentity(claims, "Token", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
-
-            return claimsIdentity;
-        }
-
-        #endregion
     }
 }

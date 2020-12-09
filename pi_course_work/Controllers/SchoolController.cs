@@ -7,35 +7,33 @@ using pi_course_work.HttpModels;
 using pi_course_work.StaticFields;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace pi_course_work.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class StudentController : ControllerBase
+    public class SchoolController : ControllerBase
     {
         private IUnitOfWork db;
 
-        public StudentController(IUnitOfWork context)
+        public SchoolController(IUnitOfWork context)
         {
             this.db = context;
         }
 
         [Authorize]
-        [HttpGet("GetClassStudents")]
-        public string GetClassStudents(int classId)
+        [HttpGet("GetSchool")]
+        public string Get()
         {
             try
             {
-                var students = db.Students.GetAll(classId);
+                var school = db.School.Get(Int32.Parse(User.Claims.Where(c => c.Type == "schoolId").Select(c => c.Value).SingleOrDefault()));
 
                 return JsonConvert.SerializeObject(new
                 {
-                    students,
+                    school,
                     HttpResults.successRequest.result,
                     HttpResults.successRequest.error
                 });
@@ -51,14 +49,12 @@ namespace pi_course_work.Controllers
         }
 
         [Authorize]
-        [HttpPost("AddStudent")]
-        public RequestResult Post([FromBody] StudentAdd student)
+        [HttpPut("UpdateSchool")]
+        public RequestResult UpdateSchool([FromBody] School school)
         {
             try
             {
-                student.schoolId = Int32.Parse(User.Claims.Where(c => c.Type == "schoolId").Select(c => c.Value).SingleOrDefault());
-
-                db.Students.Add(student);
+                db.School.Update(school);
                 return HttpResults.successRequest;
             }
             catch (Exception)
@@ -68,27 +64,12 @@ namespace pi_course_work.Controllers
         }
 
         [Authorize]
-        [HttpPut("UpdateStudent")]
-        public RequestResult UpdateStudent(StudentUpdate student)
-        {   
-            try
-            {
-                db.Students.Update(student);
-                return HttpResults.successRequest;
-            }
-            catch (Exception)
-            {
-                return HttpResults.badRequest;
-            }
-        }
-
-        [Authorize]
-        [HttpDelete("RemoveStudent")]
-        public RequestResult Delete(int personalDataId)
+        [HttpDelete("RemoveSchool")]
+        public RequestResult Delete()
         {
             try
             {
-                db.Students.Delete(personalDataId);
+                db.School.Delete(Int32.Parse(User.Claims.Where(c => c.Type == "schoolId").Select(c => c.Value).SingleOrDefault()));
                 return HttpResults.successRequest;
             }
             catch (Exception)

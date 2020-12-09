@@ -4,8 +4,9 @@
     {
         public Schedule() { }
 
-        public Schedule(int idclass, int idteacher, int idtime, int idauditorium, int idlesson)
+        public Schedule(int id, int idclass, int idteacher, int idtime, int idauditorium, int idlesson)
         {
+            this.id = id;
             this.idclass = idclass;
             this.idteacher = idteacher;
             this.idtime = idtime;
@@ -13,6 +14,7 @@
             this.idlesson = idlesson;
         }
 
+        public int id { get; set; }
         public int idclass { get; set; }
         public int idteacher { get; set; }
         public int idtime { get; set; }

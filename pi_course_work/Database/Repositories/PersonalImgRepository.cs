@@ -18,22 +18,23 @@ namespace pi_course_work.Database.Repositories
 
         public void Add(PersonalImg item)
         {
-            db.personalImg.Add(item);
+            //db.personalImg.Add(item);
         }
 
         public void Delete(int id)
         {
-            db.personalImg.Remove(db.personalImg.Find(id));
+            //db.personalImg.Remove(db.personalImg.Find(id));
         }
 
         public PersonalImg Get(int id)
         {
-            return db.personalImg.Find(id);
+            //return db.personalImg.Find(id);
+            return null;
         }
 
         public IEnumerable<PersonalImg> GetAll()
         {
-            return db.personalImg;
+            return null;
         }
 
         public void Update(PersonalImg item)

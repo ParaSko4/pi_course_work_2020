@@ -29,7 +29,6 @@ namespace pi_course_work.Controllers
         [HttpGet("WorkersData")]
         public string GetAllWorkers()
         {
-            ClaimsIdentity ident = HttpContext.User.Identity as ClaimsIdentity;
             try
             {
                 int schoolId = Int32.Parse(User.Claims.Where(c => c.Type == "schoolId").Select(c => c.Value).SingleOrDefault());
@@ -42,7 +41,7 @@ namespace pi_course_work.Controllers
                     HttpResults.successRequest.error
                 });
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return JsonConvert.SerializeObject(new
                 {
@@ -56,7 +55,6 @@ namespace pi_course_work.Controllers
         [HttpGet("WorkersWithoutClass")]
         public string GetAllWorkersWithoutClass()
         {
-            ClaimsIdentity ident = HttpContext.User.Identity as ClaimsIdentity;
             try
             {
                 int schoolId = Int32.Parse(User.Claims.Where(c => c.Type == "schoolId").Select(c => c.Value).SingleOrDefault());
@@ -69,7 +67,7 @@ namespace pi_course_work.Controllers
                     HttpResults.successRequest.error
                 });
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return JsonConvert.SerializeObject(new
                 {
@@ -94,7 +92,7 @@ namespace pi_course_work.Controllers
                     HttpResults.successRequest.error
                 });
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return JsonConvert.SerializeObject(new
                 {
@@ -108,12 +106,10 @@ namespace pi_course_work.Controllers
         [HttpPost("NewWorker")]
         public RequestResult Post([FromBody] NewWorker newWorker)
         {
-            newWorker.schoolId = Int32.Parse(User.Claims.Where(c => c.Type == "schoolId").Select(c => c.Value).SingleOrDefault());
-
-            Debug.WriteLine(JsonConvert.SerializeObject(newWorker));
-
             try
             {
+                newWorker.schoolId = Int32.Parse(User.Claims.Where(c => c.Type == "schoolId").Select(c => c.Value).SingleOrDefault());
+
                 db.SchoolWorkers.Add(newWorker);
                 return HttpResults.successRequest;
             }
@@ -127,16 +123,30 @@ namespace pi_course_work.Controllers
         [HttpDelete("RemoveWorker")]
         public RequestResult RemoveWorker(int id)
         {
-            db.SchoolWorkers.Delete(id);
-            return HttpResults.successRequest;
+            try
+            {
+                db.SchoolWorkers.Delete(id);
+                return HttpResults.successRequest;
+            }
+            catch (Exception)
+            {
+                return HttpResults.badRequest;
+            }
         }
 
         [Authorize]
         [HttpPut("UpdateWorker")]
         public RequestResult UpdateWorker(UpdateWorker worker)
         {
-            db.SchoolWorkers.Update(worker);
-            return HttpResults.successRequest;
+            try
+            {
+                db.SchoolWorkers.Update(worker);
+                return HttpResults.successRequest;
+            }
+            catch (Exception)
+            {
+                return HttpResults.badRequest;
+            }
         }
     }
 }

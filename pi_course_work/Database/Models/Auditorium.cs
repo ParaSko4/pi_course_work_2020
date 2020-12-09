@@ -4,15 +4,17 @@
     {
         public Auditorium() { }
 
-        public Auditorium(int id, string number, string name)
+        public Auditorium(int id, string number, string name, int idschool)
         {
             this.id = id;
             this.number = number;
             this.name = name;
+            this.idschool = idschool;
         }
 
         public int id { get; set; }
         public string number { get; set; }
         public string name { get; set; }
+        public int idschool { get; set; }
     }
 }

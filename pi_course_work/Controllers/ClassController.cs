@@ -27,10 +27,9 @@ namespace pi_course_work.Controllers
         }
 
         [Authorize]
-        [HttpGet("ClassesData")]
+        [HttpGet("GetAllClasses")]
         public string AddClass()
         {
-            ClaimsIdentity ident = HttpContext.User.Identity as ClaimsIdentity;
             try
             {
                 int schoolId = Int32.Parse(User.Claims.Where(c => c.Type == "schoolId").Select(c => c.Value).SingleOrDefault());
@@ -43,7 +42,7 @@ namespace pi_course_work.Controllers
                     HttpResults.successRequest.error
                 });
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return JsonConvert.SerializeObject(new
                 {
@@ -68,7 +67,7 @@ namespace pi_course_work.Controllers
                     HttpResults.successRequest.error
                 });
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return JsonConvert.SerializeObject(new
                 {
@@ -82,10 +81,9 @@ namespace pi_course_work.Controllers
         [HttpPost("AddClass")]
         public RequestResult AddClass([FromBody] Class newClass)
         {
-            ClaimsIdentity ident = HttpContext.User.Identity as ClaimsIdentity;
             int schoolId = Int32.Parse(User.Claims.Where(c => c.Type == "schoolId").Select(c => c.Value).SingleOrDefault());
 
-            if (!db.Classes.isExist(newClass, schoolId))
+            if (db.Classes.isExist(newClass, schoolId))
             {
                 return HttpResults.badClassRequest;
             }
@@ -99,6 +97,21 @@ namespace pi_course_work.Controllers
             {
                 return HttpResults.badRequest;
             }            
+        }
+
+        [Authorize]
+        [HttpPut("UpdateClass")]
+        public RequestResult UpdateClass([FromBody]Class schoolClass)
+        {
+            try
+            {
+                db.Classes.Update(schoolClass);
+                return HttpResults.successRequest;
+            }
+            catch (Exception)
+            {
+                return HttpResults.badRequest;
+            }
         }
 
         [Authorize]

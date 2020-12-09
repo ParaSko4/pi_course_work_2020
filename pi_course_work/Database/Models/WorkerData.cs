@@ -5,6 +5,7 @@ namespace pi_course_work.Database.Models
     public class WorkerData
     {
         public WorkerData() { }
+
         public WorkerData(int workerId, string position, int idpersonaldata, string name, string surname, string middlename, string fullname, DateTime? birthday, string residence, string number, string sex, DateTime? joindate, int accountId, string login, string password, string role)
         {
             this.workerId = workerId;

@@ -1,6 +1,7 @@
 ﻿using pi_course_work.Database.Contexts;
 using pi_course_work.Database.Models;
 using pi_course_work.Database.Repositories.Interfaces;
+using StoredProcedureEFCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,29 +18,45 @@ namespace pi_course_work.Database.Repositories
             this.db = context;
         }
 
-        public void Add(Lesson item)
+        public void Add(Lesson lesson)
         {
-            throw new NotImplementedException();
+            db.LoadStoredProc("add_lesson")
+                .AddParam("schoolId", lesson.idschool)
+                .AddParam("name", lesson.name)
+                .ExecNonQuery();
         }
 
         public void Delete(int id)
         {
-            throw new NotImplementedException();
+            db.LoadStoredProc("remove_lesson")
+                .AddParam("id", id)
+                .ExecNonQuery();
         }
 
-        public Lesson Get(int id)
+        public void DeleteAll(int schoolId)
         {
-            throw new NotImplementedException();
+            db.LoadStoredProc("remove_all_lessons")
+                .AddParam("schoolId", schoolId)
+                .ExecNonQuery();
         }
 
-        public IEnumerable<Lesson> GetAll()
+        public List<Lesson> GetAll(int schoolId)
         {
-            throw new NotImplementedException();
+            List<Lesson> lessons = null;
+
+            db.LoadStoredProc("get_lessons")
+                .AddParam("schoolId", schoolId)
+                .Exec(r => lessons = r.ToList<Lesson>());
+
+            return lessons;
         }
 
-        public void Update(Lesson item)
+        public void Update(Lesson lesson)
         {
-            throw new NotImplementedException();
+            db.LoadStoredProc("update_lesson")
+                .AddParam("lessonId", lesson.id)
+                .AddParam("name", lesson.name)
+                .ExecNonQuery();
         }
     }
 }

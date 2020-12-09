@@ -33,7 +33,7 @@ namespace pi_course_work.Database.Repositories
 
         public MemberAccount GetAccount(string login, string password)
         {
-            return db.membersAccounts.FirstOrDefault(a => a.login == login && a.password == password);
+            return null;
         }
 
         public IEnumerable<MemberAccount> GetAll()
