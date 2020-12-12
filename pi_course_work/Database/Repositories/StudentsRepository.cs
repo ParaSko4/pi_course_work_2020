@@ -40,9 +40,15 @@ namespace pi_course_work.Database.Repositories
                .ExecNonQuery();
         }
 
-        public Student Get(int id)
+        public StudentData Get(int id)
         {
-            throw new NotImplementedException();
+            StudentData student = null;
+
+            db.LoadStoredProc("get_student")
+               .AddParam("personalId", id)
+               .Exec(r => student = r.FirstOrDefault<StudentData>());
+
+            return student;
         }
 
         public List<StudentData> GetAll(int classId)

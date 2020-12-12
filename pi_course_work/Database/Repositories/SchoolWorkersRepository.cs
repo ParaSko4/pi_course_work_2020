@@ -65,6 +65,17 @@ namespace pi_course_work.Database.Repositories
             return rows;
         }
 
+        public WorkerData Get(int workerId)
+        {
+            WorkerData worker = null;
+
+            db.LoadStoredProc("get_school_worker")
+               .AddParam("workerId", workerId)
+               .Exec(r => worker = r.FirstOrDefault<WorkerData>());
+
+            return worker;
+        }
+
         public List<WorkerData> GetAllWithoutClass(int schoolId)
         {
             List<WorkerData> rows = null;

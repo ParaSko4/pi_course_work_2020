@@ -6,16 +6,15 @@ namespace pi_course_work.Database.Models
     {
         public StudentData() { }
 
-        public StudentData(int studentId, int accountId, int classId, int personalDataId, string name, string surname, string middlename, string fullName, DateTime? birthday, string residence, string number, string sex, DateTime? joindate, string login, string password, string role)
+        public StudentData(int personalDataId, int studentId, int accountId, string fullName, string name, string surname, string middlename, DateTime? birthday, string residence, string number, string sex, DateTime? joindate, string login, string password, string role)
         {
+            this.personalDataId = personalDataId;
             this.studentId = studentId;
             this.accountId = accountId;
-            this.classId = classId;
-            this.personalDataId = personalDataId;
+            this.fullName = fullName;
             this.name = name;
             this.surname = surname;
             this.middlename = middlename;
-            this.fullName = fullName;
             this.birthday = birthday;
             this.residence = residence;
             this.number = number;
@@ -26,15 +25,15 @@ namespace pi_course_work.Database.Models
             this.role = role;
         }
 
+        public int personalDataId { get; set; }
         public int studentId { get; set; }
         public int accountId { get; set; }
-        public int classId { get; set; }
-        public int personalDataId { get; set; }
+
+        public string fullName { get; set; }
 
         public string name { get; set; }
         public string surname { get; set; }
         public string middlename { get; set; }
-        public string fullName { get; set; }
         public DateTime? birthday { get; set; }
         public string residence { get; set; }
         public string number { get; set; }

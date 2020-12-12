@@ -96,5 +96,30 @@ namespace pi_course_work.Controllers
                 return HttpResults.badRequest;
             }
         }
+        
+        [Authorize]
+        [HttpGet("GetStudent")]
+        public string GetStudent()
+        {
+            try
+            {
+                var personalData = db.Students.Get(Int32.Parse(User.Claims.Where(c => c.Type == "userId").Select(c => c.Value).SingleOrDefault()));
+
+                return JsonConvert.SerializeObject(new
+                {
+                    personalData,
+                    HttpResults.successRequest.result,
+                    HttpResults.successRequest.error
+                });
+            }
+            catch (Exception)
+            {
+                return JsonConvert.SerializeObject(new
+                {
+                    HttpResults.badRequest.error,
+                    HttpResults.badRequest.result
+                });
+            }
+        }
     }
 }

@@ -53,7 +53,13 @@ namespace pi_course_work.Database.Repositories
 
         public PersonalData Get(int id)
         {
-            return null;
+            PersonalData data = null;
+
+            db.LoadStoredProc("get_personaldata")
+               .AddParam("userId", id)
+               .Exec(r => data = r.FirstOrDefault<PersonalData>());
+
+            return data;
         }
 
         public IEnumerable<PersonalData> GetAll()

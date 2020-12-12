@@ -54,20 +54,14 @@ namespace pi_course_work.Database.Repositories
             db.LoadStoredProc("login_crm_father")
                    .AddParam("login", father.father)
                    .AddParam("password", father.password)
-                   .AddParam("isExist", out IOutParam<int> i)
+                   .AddParam("isExist", out IOutParam<int> outIsExist)
                    .AddParam("fatherId", out IOutParam<int> outId)
                    .ExecNonQuery();
-            try
-            {
-                fatherId = outId.Value;
-            }
-            catch (Exception)
-            {
-                fatherId = -1;
-                return false;
-            }
 
-            return Convert.ToBoolean(i.Value);
+            bool isExist = Convert.ToBoolean(outIsExist.Value);
+            fatherId = isExist ? outId.Value : -1;
+
+            return isExist;
         }
     }
 }

@@ -70,15 +70,12 @@ namespace pi_course_work
             services.AddTransient<ILessonRepository, LessonsRepository>();
             services.AddTransient<IMembersAccountRepository, MembersAccountsRepository>();
             services.AddTransient<IPersonalRepositry, PersonalDataRepository>();
-            services.AddTransient<IPersonalImgRepository, PersonalImgRepository>();
             services.AddTransient<IProgressRepository, ProgressRepository>();
             services.AddTransient<IScheduleRepository, SchedulesRepository>();
-            services.AddTransient<ISchoolImgRepository, SchoolImgRepository>();
             services.AddTransient<ISchoolRepository, SchoolsRepository>();
             services.AddTransient<ISchoolTimeRepository, SchoolTimesRepository>();
             services.AddTransient<ISchoolWorkerRepository, SchoolWorkersRepository>();
             services.AddTransient<IStudentRepository, StudentsRepository>();
-            services.AddTransient<ISchoolDataRepository, SchoolDataRepository>();
 
             services.AddTransient<IUnitOfWork, SchoolDbUnit>();
 

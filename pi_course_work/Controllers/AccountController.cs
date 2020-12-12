@@ -32,7 +32,7 @@ namespace pi_course_work.Controllers
 
         [Authorize]
         [HttpGet("me")]
-        public string AccMe()
+        public string GetUserInfo()
         {
             ClaimsIdentity ident = HttpContext.User.Identity as ClaimsIdentity;
 
@@ -55,31 +55,23 @@ namespace pi_course_work.Controllers
         [HttpPost("login")]
         public RequestResult Login([FromBody] SignInData data)
         {
-            CRMFather father = new CRMFather(data.login, data.password);
-            int idFather = 0;
+            bool loginSuccess = false;
+            string encodedJwt = "";
+            int id = 0;
 
-            if (db.CrmFathers.canLogin(father, out idFather))
+            if (db.CrmFathers.canLogin(new CRMFather(data.login, data.password), out id))
             {
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimsIdentity.DefaultNameClaimType, data.login),
-                    new Claim(ClaimsIdentity.DefaultRoleClaimType, Roles.FATHER_ROLE),
-                    new Claim("userId", idFather.ToString()),
-                    new Claim("schoolId", db.School.GetSchoolId(idFather).ToString())
-                };
+                encodedJwt = GetFatherJwt(data, id);
+                loginSuccess = true;
+            }
+            else if (db.MembersAccounts.isLogin(data.login, data.password, out id))
+            {
+                encodedJwt = GetMemberJwt(data, id);
+                loginSuccess = true;
+            }
 
-                ClaimsIdentity cd = new ClaimsIdentity(claims, "ApplicationCookie");
-
-                var now = DateTime.UtcNow;
-                var jwt = new JwtSecurityToken(
-                        issuer: AuthOptions.ISSUER,
-                        audience: AuthOptions.AUDIENCE,
-                        notBefore: now,
-                        claims: cd.Claims,
-                        expires: now.Add(TimeSpan.FromMinutes(AuthOptions.LIFETIME)),
-                        signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
-                var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
-
+            if (loginSuccess)
+            {
                 HttpContext.Response.Cookies.Append(
                     ".AspNetCore.Application.Id",
                     encodedJwt,
@@ -87,7 +79,6 @@ namespace pi_course_work.Controllers
 
                 return HttpResults.successRequest;
             }
-            
             return HttpResults.badLoginRequest;
         }
 
@@ -132,6 +123,53 @@ namespace pi_course_work.Controllers
         {
             Debug.WriteLine("unauthorized");
             return HttpResults.unauthorizedRequest;
+        }
+
+        private string GetFatherJwt(SignInData sid, int fatherId)
+        {
+            var claims = new List<Claim>
+                {
+                    new Claim(ClaimsIdentity.DefaultNameClaimType, sid.login),
+                    new Claim(ClaimsIdentity.DefaultRoleClaimType, Roles.FATHER_ROLE),
+                    new Claim("userId", fatherId.ToString()),
+                    new Claim("schoolId", db.School.GetSchoolId(fatherId).ToString())
+                };
+
+            ClaimsIdentity cd = new ClaimsIdentity(claims, "ApplicationCookie");
+
+            var now = DateTime.UtcNow;
+            var jwt = new JwtSecurityToken(
+                    issuer: AuthOptions.ISSUER,
+                    audience: AuthOptions.AUDIENCE,
+                    notBefore: now,
+                    claims: cd.Claims,
+                    expires: now.Add(TimeSpan.FromMinutes(AuthOptions.LIFETIME)),
+                    signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
+            return new JwtSecurityTokenHandler().WriteToken(jwt);
+        }
+        private string GetMemberJwt(SignInData sid, int id)
+        {
+            var personalData = db.Persones.Get(id);
+
+            var claims = new List<Claim>
+                {
+                    new Claim(ClaimsIdentity.DefaultNameClaimType, sid.login),
+                    new Claim(ClaimsIdentity.DefaultRoleClaimType, db.MembersAccounts.Get(id).role),
+                    new Claim("userId", id.ToString()),
+                    new Claim("schoolId", personalData.idschool.ToString())
+                };
+
+            ClaimsIdentity cd = new ClaimsIdentity(claims, "ApplicationCookie");
+
+            var now = DateTime.UtcNow;
+            var jwt = new JwtSecurityToken(
+                    issuer: AuthOptions.ISSUER,
+                    audience: AuthOptions.AUDIENCE,
+                    notBefore: now,
+                    claims: cd.Claims,
+                    expires: now.Add(TimeSpan.FromMinutes(AuthOptions.LIFETIME)),
+                    signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
+            return new JwtSecurityTokenHandler().WriteToken(jwt);
         }
     }
 }

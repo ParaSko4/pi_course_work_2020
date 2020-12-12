@@ -2,8 +2,9 @@
 
 namespace pi_course_work.Database.Repositories.Interfaces
 {
-    public interface IMembersAccountRepository : IRepositoryBase<MemberAccount>
+    public interface IMembersAccountRepository
     {
-        MemberAccount GetAccount(string login, string password);
+        MemberAccount Get(int id);
+        bool isLogin(string login, string password, out int id);
     }
 }

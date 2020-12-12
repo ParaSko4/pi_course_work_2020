@@ -6,7 +6,7 @@ namespace pi_course_work.Database.Repositories.Interfaces
     public interface IStudentRepository
     {
         List<StudentData> GetAll(int classId);
-        Student Get(int id);
+        StudentData Get(int id);
         void Add(StudentAdd item);
         void Update(StudentUpdate item);
         void Delete(int personalDataId);

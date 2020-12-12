@@ -1,6 +1,7 @@
 ﻿using pi_course_work.Database.Contexts;
 using pi_course_work.Database.Models;
 using pi_course_work.Database.Repositories.Interfaces;
+using StoredProcedureEFCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,34 +17,30 @@ namespace pi_course_work.Database.Repositories
             this.db = context;
         }
 
-        public void Add(MemberAccount item)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Delete(int id)
-        {
-            throw new NotImplementedException();
-        }
-
         public MemberAccount Get(int id)
         {
-            throw new NotImplementedException();
+            MemberAccount acc = null;
+
+            db.LoadStoredProc("get_memberaccount")
+                .AddParam("userId", id)
+                .Exec(r => acc = r.FirstOrDefault<MemberAccount>());
+
+            return acc;
         }
 
-        public MemberAccount GetAccount(string login, string password)
+        public bool isLogin(string login, string password, out int id)
         {
-            return null;
-        }
+            db.LoadStoredProc("login_school_member")
+                .AddParam("login", login)
+                .AddParam("password", password)
+                .AddParam("id", out IOutParam<int> outId)
+                .AddParam("isExist", out IOutParam<bool> outIsExist)
+                .ExecNonQuery();
 
-        public IEnumerable<MemberAccount> GetAll()
-        {
-            throw new NotImplementedException();
-        }
+            bool isExist = Convert.ToBoolean(outIsExist.Value);
+            id = isExist ? outId.Value : -1;
 
-        public void Update(MemberAccount item)
-        {
-            throw new NotImplementedException();
+            return isExist;
         }
     }
 }

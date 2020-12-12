@@ -8,15 +8,12 @@
         ILessonRepository Lessons { get; }
         IMembersAccountRepository MembersAccounts { get; }
         IPersonalRepositry Persones { get; }
-        IPersonalImgRepository PersonalImg { get; }
         IProgressRepository Progress { get; }
         IScheduleRepository Schedules { get; }
-        ISchoolImgRepository SchoolImg { get; }
         ISchoolRepository School { get; }
         ISchoolTimeRepository SchoolTime { get; }
         ISchoolWorkerRepository SchoolWorkers { get; }
         IStudentRepository Students { get; }
-        ISchoolDataRepository SchoolData { get; }
 
         int Complete();
     }

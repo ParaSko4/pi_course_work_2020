@@ -1,10 +1,9 @@
 ﻿using pi_course_work.Database.Contexts;
 using pi_course_work.Database.Models;
 using pi_course_work.Database.Repositories.Interfaces;
+using StoredProcedureEFCore;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace pi_course_work.Database.Repositories
 {
@@ -17,29 +16,62 @@ namespace pi_course_work.Database.Repositories
             this.db = context;
         }
 
-        public void Add(Progress item)
+        public void Add(Progress progress)
         {
-            throw new NotImplementedException();
+            db.LoadStoredProc("put_student_mark")
+               .AddParam("teacherId", progress.idteacher)
+               .AddParam("lessonId", progress.idlesson)
+               .AddParam("studentId", progress.idstudent)
+               .AddParam("mark", progress.mark)
+               .ExecNonQuery();
         }
 
         public void Delete(int id)
         {
-            throw new NotImplementedException();
+            db.LoadStoredProc("remove_student_mark")
+               .AddParam("markId", id)
+               .ExecNonQuery();
         }
 
-        public Progress Get(int id)
+        public List<Progress> GetAll(int schoolId)
         {
-            throw new NotImplementedException();
+            List<Progress> marks = null;
+
+            db.LoadStoredProc("get_marks")
+               .AddParam("schoolId", schoolId)
+               .Exec(r => marks = r.ToList<Progress>());
+
+            return marks;
         }
 
-        public IEnumerable<Progress> GetAll()
+        public List<Progress> GetStudent(int personalId)
         {
-            throw new NotImplementedException();
+            List<Progress> marks = null;
+
+            db.LoadStoredProc("get_student_marks")
+                .AddParam("personalId", personalId)
+                .Exec(r => marks = r.ToList<Progress>());
+
+            return marks;
         }
 
-        public void Update(Progress item)
+        public List<Progress> GetTeacher(int workerId)
         {
-            throw new NotImplementedException();
+            List<Progress> marks = null;
+
+            db.LoadStoredProc("get_worker_marks")
+                .AddParam("workerId", workerId)
+                .Exec(r => marks = r.ToList<Progress>());
+
+            return marks;
+        }
+
+        public void Update(int id, int mark)
+        {
+            db.LoadStoredProc("update_student_mark")
+               .AddParam("markId", id)
+               .AddParam("newMark", mark)
+               .ExecNonQuery();
         }
     }
 }
