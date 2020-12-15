@@ -6,6 +6,10 @@ export const navBarPath = {
     SchoolManager: '/SchoolManager',
     SchoolStat: '/SchoolStat',
     SchoolInfo: '/SchoolInfo',
+    ClassById: '/Class/:classId',
+    Login: '/login',
+    TeacherPage: '/Teacher/main',
+    StudentPage: '/Student/main',
 
     addNewWorker: '/SchoolManager/newWorker',
 
@@ -30,5 +34,10 @@ export const roles = {
 }
 
 export const formNames = {
-    newWorker: 'newWorker'
+    newWorker: 'newWorker',
+    addClass: 'addClass',
+    addStudent: 'addStudent',
+    addTime: 'addTime',
+    addAuditorium: 'addAuditorium',
+    addLesson: 'addLesson',
 }

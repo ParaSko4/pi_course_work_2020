@@ -10,6 +10,12 @@ import {navBarPath, roles} from "./resources/const-strings";
 import NavFatherMenuContainer from "./components/MainPanel/Father/NavFatherMenuContainer";
 import SchoolManagerContainer from "./components/MainPanel/Father/SchoolManager/SchoolManagerContainer";
 import {exitFromApp} from "./redux/auth-reducer";
+import ClassContainer from "./components/Class/ClassContainer";
+import {Loader} from "./components/commons/Loader";
+import SettingContainer from "./components/Setting/SettingContainer";
+import TeacherContainer from "./components/MainPanel/Teacher/TeacherContainer";
+import StudentContainer from "./components/MainPanel/Student/StudentContainer";
+import StatisticComponent from "./components/Statistic/StatisticContainer";
 
 const { Sider } = Layout;
 
@@ -28,14 +34,12 @@ class App extends React.Component {
 
     render() {
         if (!this.props.isInitializing){
-            return <div className={styles.parentLoaderDiv}>
-                <Spin size="large" />
-            </div>
+            return <Loader />
         }
         return (
             <Layout style={{ minHeight: '100vh' }}>
                 {
-                    this.props.isAuth && <Sider
+                    this.props.isAuth && this.props.userRole === roles.FATHER_ROLE && <Sider
                         style={{
                             overflow: 'auto',
                             height: '100vh',
@@ -50,24 +54,33 @@ class App extends React.Component {
                                 </Avatar>
                             </Dropdown>
                         </div>
-                        {this.props.userRole === roles.FATHER_ROLE && <NavFatherMenuContainer />}
+                        <NavFatherMenuContainer />
                     </Sider>
                 }
                 <Switch>
-                    <Route path='/login' render={() => <LoginContainer/>}/>
-                    <Route path={navBarPath.SchoolManager} render={() => <SchoolManagerContainer />}/>
-                    <Route path={navBarPath.SchoolStat} render={() => 'SchoolStat'}/>
-                    <Route path={navBarPath.SchoolInfo} render={() => 'SchoolInfo'}/>
-                    <Route path={'/'} render={() => {
+                    <Route exact path={navBarPath.Login} render={() => <LoginContainer/>}/>
+                    <Route exact path={navBarPath.SchoolManager} render={() => <SchoolManagerContainer />}/>
+                    <Route exact path={navBarPath.SchoolStat} render={() => <StatisticComponent/>}/>
+                    <Route exact path={navBarPath.SchoolInfo} render={() => <SettingContainer />}/>
+                    <Route exact path={navBarPath.ClassById} render={() => <ClassContainer />}/>
+
+                    <Route exact path={navBarPath.TeacherPage} render={() => <TeacherContainer />}/>
+                    <Route exact path={navBarPath.StudentPage} render={() => <StudentContainer />}/>
+
+
+                    <Route exact path={'/'} render={() => {
+                        if (!this.props.isAuth){
+                            return <Redirect to={navBarPath.Login}/>
+                        }
                         if(this.props.userRole === roles.FATHER_ROLE){
                             return <Redirect to={navBarPath.SchoolManager}/>
                         }
-                        // if(this.props.userRole === roles.TEACHER_ROLE){
-                        //     return <Redirect to={navBarPath.SchoolManager}/>
-                        // }
-                        // if(this.props.userRole === roles.STUDENT_ROLE){
-                        //     return <Redirect to={navBarPath.SchoolManager}/>
-                        // }
+                        if(this.props.userRole === roles.TEACHER_ROLE){
+                            return <Redirect to={navBarPath.TeacherPage}/>
+                        }
+                        if(this.props.userRole === roles.STUDENT_ROLE){
+                            return <Redirect to={navBarPath.StudentPage}/>
+                        }
                     }}/>
                 </Switch>
             </Layout>

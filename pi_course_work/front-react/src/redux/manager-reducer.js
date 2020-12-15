@@ -1,103 +1,163 @@
-import {apiAccount as apiAccoun, apiAccount, apiLogin, apiSchoolCRUD} from "../api/api_course_work";
+import {apiSchoolCRUD} from "../api/api_course_work";
 import {message} from "antd";
 
-const SET_SCHOOL_WORKERS = 'schoolManager/SET_SCHOOL_WORKERS'
-const ADD_NEW_WORKER = 'schoolManager/ADD_NEW_WORKER'
-const SET_MODIFIED_WORKER = 'schoolManager/SET_MODIFIED_WORKER'
-const LOGOUT_FROM_APP = 'schoolManager/LOGOUT_FROM_APP'
+const SUCCESS_INITIALIZING_MANAGER = 'schoolManager/SUCCESS_INITIALIZING_MANAGER'
+const LOGOUT = 'schoolManager/LOGOUT'
+const SET_WORKERS = 'schoolManager/SET_WORKERS'
+const SET_WORKERS_WITHOUT_CLASS = 'schoolManager/SET_WORKERS_WITHOUT_CLASS'
+const SET_CLASSES = 'schoolManager/SET_CLASSES'
+const SET_STUDENTS = 'schoolManager/SET_STUDENTS'
 
 let initialState = {
+    isInitializing: false,
     workersCount: 0,
     workers: [],
+    workersWithoutClass: [],
     classesCount: 0,
-    classes: []
+    classes: [],
+    students: [],
+    studentsCount: 0
 }
 
 const managerReducer = (state = initialState, action) => {
     switch (action.type) {
-        case SET_SCHOOL_WORKERS:
+        case SUCCESS_INITIALIZING_MANAGER:
+            return {
+                ...state,
+                isInitializing: true
+            }
+        case LOGOUT:
+            return initialState
+        case SET_WORKERS:
             return {
                 ...state,
                 workers: [...action.workers],
                 workersCount: action.workers.length
             }
-        case ADD_NEW_WORKER:
+        case SET_CLASSES:
             return {
                 ...state,
-                workersCount: state.schoolWorkers.workersCount + 1,
-                workers: [...state.schoolWorkers.workers, action.newWorker]
+                classes: [...action.classes],
+                classesCount: action.classes.length
             }
-        case SET_MODIFIED_WORKER:
-            let arr = state.workers.filter(function(item) {
-                return item.id !== action.modifiedWorker.id
-            })
-
-            action.modifiedWorker.fullName = action.modifiedWorker.name + ' ' + action.modifiedWorker.surname + ' ' + action.modifiedWorker.middlename
-
-            return{
+        case SET_STUDENTS:
+            return {
                 ...state,
-                workers: [...arr, action.modifiedWorker].sort()
+                students: [...action.students],
+                studentsCount: action.students.length
+            }
+        case SET_WORKERS_WITHOUT_CLASS:
+            return {
+                ...state,
+                workersWithoutClass: [...action.workersWithoutClass]
             }
         default:
             return state
     }
 }
-export const setSchoolWorkers = (workers) => ({type: SET_SCHOOL_WORKERS, workers})
-export const setNewWorker = (newWorker) => ({type: ADD_NEW_WORKER, newWorker})
-export const setModifiedWorker = (modifiedWorker) => ({type: SET_MODIFIED_WORKER, modifiedWorker})
+
+export const initializingSuccess = () => ({type: SUCCESS_INITIALIZING_MANAGER})
+export const logoutManager = () => ({type: LOGOUT})
+export const setWorkers = (workers) => ({type: SET_WORKERS, workers})
+export const setWorkersWithoutClass = (workersWithoutClass) => ({type: SET_WORKERS_WITHOUT_CLASS, workersWithoutClass})
+export const setClasses = (classes) => ({type: SET_CLASSES, classes})
+export const setStudents = (students) => ({type: SET_STUDENTS, students})
+
+export const startInitializingManager = () => (dispatch) => {
+    let promise = []
+    promise.push(dispatch(loadSchoolWorkers()))
+    promise.push(dispatch(loadWorkersWithoutClass()))
+    promise.push(dispatch(loadClasses()))
+
+    Promise.all(promise).then(() => {
+            dispatch(initializingSuccess())
+        }
+    )
+}
 
 export const loadSchoolWorkers = () => async (dispatch) => {
     let response = await apiSchoolCRUD.loadWorkers()
 
-    if (response.result === 0){
-        dispatch(setSchoolWorkers(response.workers))
-    }else{
+    if (response.result === 0) {
+        dispatch(setWorkers(response.workers))
+    } else {
+        console.log(response.error)
+    }
+}
+
+export const loadWorkersWithoutClass = () => async (dispatch) => {
+    let response = await apiSchoolCRUD.loadWorkersWithoutClass()
+
+    if (response.result === 0) {
+        dispatch(setWorkersWithoutClass(response.workers))
+    } else {
+        console.log(response.error)
+    }
+}
+
+export const loadClasses = () => async (dispatch) => {
+    let response = await apiSchoolCRUD.loadClasses();
+
+    if (response.result === 0) {
+        dispatch(setClasses(response.classes))
+    } else {
         console.log(response.error)
     }
 }
 
 export const addNewWorker = (values) => async (dispatch) => {
-    console.log(values)
     let response = await apiSchoolCRUD.newWorker(values)
 
-    if(response.result === 0){
-        let response = await apiSchoolCRUD.loadWorkers()
-
-        if (response.result === 0){
-            dispatch(setSchoolWorkers(response.workers))
-        }else{
-            console.log(response.error)
-        }
-    }else{
+    if (response.result === 0) {
+        dispatch(loadSchoolWorkers())
+        dispatch(loadWorkersWithoutClass())
+        message.success({content: 'Worker was added', duration: 2})
+    } else {
         console.log(response.error)
+        message.error({content: 'Action error', duration: 2})
     }
 }
 
 export const removeWorker = (index) => async (dispatch) => {
     let response = await apiSchoolCRUD.removeWorker(index)
 
-    if (response.result === 0){
+    if (response.result === 0) {
         message.success({content: 'Worker removed success!', duration: 2})
 
-        let response = await apiSchoolCRUD.loadWorkers()
-
-        if (response.result === 0){
-            dispatch(setSchoolWorkers(response.workers))
-        }else{
-            console.log(response.error)
-        }
-    }else{
+        dispatch(loadSchoolWorkers())
+        dispatch(loadWorkersWithoutClass())
+        dispatch(loadClasses())
+    } else {
         message.error({content: 'Can\'t remove this worker ): ', duration: 2})
     }
 }
 
 export const modifiedWorker = (worker) => async (dispatch) => {
-    let response = await apiSchoolCRUD.setModifiedObject(worker)
+    let response = await apiSchoolCRUD.updateWorker(worker)
 
-    if (response.result === 0){
-        dispatch(setModifiedWorker(worker))
-    }else{
+    if (response.result === 0) {
+        dispatch(loadSchoolWorkers())
+        dispatch(loadWorkersWithoutClass())
+    } else {
         console.log(response.error)
+        message.error({content: 'Action error', duration: 2})
     }
 }
+
+export const addNewClass = (newClass) => async (dispatch) => {
+    let response = await apiSchoolCRUD.addClass(newClass);
+
+    if (response.result === 0) {
+        dispatch(loadClasses())
+        dispatch(loadWorkersWithoutClass())
+        message.success({content: 'Class was added', duration: 2})
+    } else {
+        if (response.result === 56) {
+            message.error({content: response.error})
+        } else {
+            console.log(response.error)
+        }
+    }
+}
+
 export default managerReducer;

@@ -13,21 +13,18 @@ const NavFatherMenu = () => {
     return <Menu theme="dark" defaultSelectedKeys={['1']} mode="inline">
         <Menu.Item key="1" icon={<DesktopOutlined/>}>
             <NavLink to={navBarPath.SchoolManager}>
-                Manage Schools
+                Manager
             </NavLink>
         </Menu.Item>
         <Menu.Item key="2" icon={<PieChartOutlined/>}>
             <NavLink to={navBarPath.SchoolStat}>
-                School Stats
+                Stats
             </NavLink>
         </Menu.Item>
         <Menu.Item key="3" icon={<InfoOutlined/>}>
             <NavLink to={navBarPath.SchoolInfo}>
-                School Info
+                School params
             </NavLink>
-        </Menu.Item>
-        <Menu.Item key="9" icon={<FileOutlined/>}>
-            Files
         </Menu.Item>
     </Menu>
 }

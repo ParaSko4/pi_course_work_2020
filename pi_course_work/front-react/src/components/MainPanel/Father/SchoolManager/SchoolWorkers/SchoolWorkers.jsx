@@ -12,22 +12,23 @@ import {
     Form,
     Radio,
     message,
-    DatePicker
+    DatePicker, Pagination
 } from "antd";
-import styles from './SchoolWorkers.module.css';
-import {PlusSquareOutlined, UserOutlined} from "@ant-design/icons";
 import {requiredMes} from "../../../../../utils/validators/common-validations";
 import {Field, reduxForm} from "redux-form";
 import {DatePickerField, TextField} from "redux-form-antd";
 import {formNames} from "../../../../../resources/const-strings";
 import moment from 'moment';
 import 'moment/locale/zh-cn';
+import {manager, schoolClass} from "../../../../../resources/pages-setting";
+import {UserOutlined} from "@ant-design/icons";
+import {RowDrawer} from "../../../../commons/DrawerElements";
 
 const {Paragraph, Title} = Typography;
 
 const formItemLayout = {
-    labelCol: {span: 4},
-    wrapperCol: {span: 16},
+    labelCol: {span: 5},
+    wrapperCol: {span: 15},
 };
 
 let required = requiredMes('Require filed')
@@ -37,6 +38,7 @@ const makeField = Component => ({input, meta, children, hasFeedback, label, ...r
 
     return (
         <Form.Item
+            {...formItemLayout}
             label={label}
             validateStatus={hasError ? "error" : "success"}
             hasFeedback={hasFeedback && hasError}
@@ -51,32 +53,32 @@ const RadioGroup = makeField(Radio.Group);
 
 const NewWorkerForm = (props) => {
     return <Form>
-        <Field label="Name:" name="name"
+        <Field label="Name:" name="name" {...formItemLayout}
                component={TextField}
                validate={[required]}
                placeholder='Leha'
         />
-        <Field label="Surname:" name="surname"
+        <Field label="Surname:" name="surname" {...formItemLayout}
                component={TextField}
                validate={[required]}
                placeholder="Rogach"
         />
-        <Field label="Middle Name:" name="middlename"
+        <Field label="Middle Name:" name="middlename" {...formItemLayout}
                component={TextField}
                validate={[required]}
                placeholder="Alexseivich"
         />
-        <Field label="Residence:" name="residence"
+        <Field label="Residence:" name="residence" {...formItemLayout}
                component={TextField}
                validate={[required]}
                placeholder="ul. Kosmonavtov"
         />
-        <Field label="Number:" name="number"
+        <Field label="Number:" name="number" {...formItemLayout}
                component={TextField}
                validate={[required]}
-               placeholder="ul. Kosmonavtov"
+               placeholder="+375(33)-236-33-58"
         />
-        <Field label='Birthday:' name="birthday"
+        <Field label='Birthday:' name="birthday" {...formItemLayout}
                component={DatePickerField}
                validate={[required]}
                placeholder="1999-05-28"
@@ -85,7 +87,7 @@ const NewWorkerForm = (props) => {
             <Radio value="f">Female</Radio>
             <Radio value="m">Male</Radio>
         </Field>
-        <Field label="Position:" name="position"
+        <Field label="Position:" name="position" {...formItemLayout}
                component={TextField}
                validate={[required]}
                placeholder="Mathematician"
@@ -93,70 +95,25 @@ const NewWorkerForm = (props) => {
     </Form>
 }
 
-const EmptyList = (props) => {
-    return <div>
-        <List bordered header={
-            <Row align={'middle'}>
-                <Col span={12}>
-                    School Workers
-                </Col>
-                <Col span={12} align={'end'}>
-                    <Button type="primary" shape="circle" icon={<PlusSquareOutlined/>} size='large'
-                            onClick={props.showModal}/>
-                </Col>
-            </Row>
-        }/>
-    </div>
-}
-
-const DescriptionItem = ({title, content, onChangeMethod}) => (
-    <Row>
-        <Col span={8}>
-            <div style={{textAlign: 'right'}}>
-                {title} :
-            </div>
-        </Col>
-        <Col span={16}>
-            <div style={{textAlign: 'center', margin: '0 0 0 20px'}}>
-                <Paragraph editable={{onChange: onChangeMethod}}>{content}</Paragraph>
-            </div>
-        </Col>
-    </Row>
-);
-
-const RowDrawer = ({title1, title2, content1, content2, onChangeMethod1, onChangeMethod2}) => (
-    <Row>
-        <Col span={12}>
-            <DescriptionItem title={title1} content={content1} onChangeMethod={onChangeMethod1}/>
-        </Col>
-        <Col span={12}>
-            <DescriptionItem title={title2} content={content2} onChangeMethod={onChangeMethod2}/>
-        </Col>
-    </Row>
-)
-
 class SchoolWorkers extends React.Component {
     state = {
         modalVisible: false,
         drawerVisible: false,
-        drawerObject: null
+        drawerObject: null,
+        currWorkerPage: 1
     }
 
-    showDrawer = (id) => {
-        let obj = {...this.props.data.find(x => x.workerId === id)}
-
+    showDrawer = (worker) => {
         this.setState({
             drawerVisible: true,
-            drawerObject: obj
+            drawerObject: {...worker}
         })
     }
-
     onClose = () => {
         this.setState({
             drawerVisible: false
         })
     }
-
     showModal = () => {
         this.props.resetForm(formNames.newWorker)
 
@@ -164,11 +121,9 @@ class SchoolWorkers extends React.Component {
             modalVisible: true
         })
     }
-
     handleOk = e => {
         this.props.remoteSubmit(formNames.newWorker)
     }
-
     handleCancel = e => {
         this.setState({
             modalVisible: false
@@ -181,71 +136,35 @@ class SchoolWorkers extends React.Component {
         })
     }
 
-    modifyName = (newName) => {
-        this.setState({
-            drawerObject: {...this.state.drawerObject, name: newName}
-        })
+    UpdateDrawerWorker = ({type, value}) => {
+        switch (type){
+            case 'Name':
+                return this.setState({drawerObject: {...this.state.drawerObject, name: value}})
+            case 'Surname':
+                return this.setState({drawerObject: {...this.state.drawerObject, surname: value}})
+            case 'Residence':
+                return this.setState({drawerObject: {...this.state.drawerObject, residence: value}})
+            case 'Number':
+                return this.setState({drawerObject: {...this.state.drawerObject, number: value}})
+            case 'Middle name':
+                return this.setState({drawerObject: {...this.state.drawerObject, middlename: value}})
+            case 'Birthday':
+                return this.setState({drawerObject: {...this.state.drawerObject, birthday: value}})
+            case 'Sex':
+                return this.setState({drawerObject: {...this.state.drawerObject, sex: value}})
+            case 'Position':
+                return this.setState({drawerObject: {...this.state.drawerObject, position: value}})
+            case 'Login':
+                return this.setState({drawerObject: {...this.state.drawerObject, login: value}})
+            case 'Password':
+                return this.setState({drawerObject: {...this.state.drawerObject, password: value}})
+        }
     }
-
-    modifySurname = (newSurname) => {
-        this.setState({
-            drawerObject: {...this.state.drawerObject, surname: newSurname}
-        })
-    }
-
-    modifyMiddleName = (newMiddleName) => {
-        this.setState({
-            drawerObject: {...this.state.drawerObject, middlename: newMiddleName}
-        })
-    }
-
-    modifyResidence = (newResidence) => {
-        this.setState({
-            drawerObject: {...this.state.drawerObject, residence: newResidence}
-        })
-    }
-
-    modifyNumber = (newNumber) => {
-        this.setState({
-            drawerObject: {...this.state.drawerObject, number: newNumber}
-        })
-    }
-
-    modifyPosition = (newPosition) => {
-        this.setState({
-            drawerObject: {...this.state.drawerObject, position: newPosition}
-        })
-    }
-
-    modifyLogin = (newLogin) => {
-        this.setState({
-            drawerObject: {...this.state.drawerObject, login: newLogin}
-        })
-    }
-
-    modifyPassword = (newPassword) => {
-        this.setState({
-            drawerObject: {...this.state.drawerObject, password: newPassword}
-        })
-    }
-
-    modifyBirthday = (newBirthday) => {
-        this.setState({
-            drawerObject: {...this.state.drawerObject, birthday: newBirthday}
-        })
-    }
-
-    modifySex = e => {
-        this.setState({
-            drawerObject: {...this.state.drawerObject, sex: e.target.value}
-        })
-    };
 
     submitWorkerChanges = () => {
         this.props.modifiedWorker(this.state.drawerObject)
         message.success('Worker modify!')
     }
-
     submitWorkerRemoving = () => {
         this.onClose()
         this.props.onRemoveWorker(this.state.drawerObject.personalDataId)
@@ -257,137 +176,152 @@ class SchoolWorkers extends React.Component {
         onSubmitSuccess: this.formFinishSuccess
     })(NewWorkerForm)
 
-    render() {
-        if (this.props.schoolWorkersCount === 0) return <EmptyList showModal={this.showModal}/>
+    pageChanges = page => {
+        this.setState({
+            currWorkerPage: page
+        })
+    }
 
+    render() {
         return <div>
-            <Row>
-                <Col className={styles.schoolWorkers}>
-                    <List
-                        bordered
-                        pagination={{
-                            pageSize: 6,
-                        }}
-                        header={
-                            <Row align={'middle'}>
-                                <Col span={12}>
-                                    School Workers
-                                </Col>
-                                <Col span={12} align={'end'}>
-                                    <Button type="primary" shape="circle" icon={<PlusSquareOutlined/>} size='large'
-                                            onClick={this.showModal}/>
-                                </Col>
-                            </Row>
-                        }
-                        itemLayout="horizontal"
-                        dataSource={this.props.data}
-                        renderItem={item => (
-                            <List.Item
-                                key={item.workerId}
-                                actions={[
-                                    <a onClick={() => this.showDrawer(item.workerId)}>
-                                        View Info
-                                    </a>
-                                ]}
-                            >
-                                <List.Item.Meta
-                                    avatar={
-                                        <Avatar size={'large'} icon={<UserOutlined/>}/>
-                                    }
-                                    title={item.fullName}
-                                    description={item.position}
-                                />
-                            </List.Item>
-                        )}
-                    />
-                    <Modal
-                        title="Basic Modal"
-                        visible={this.state.modalVisible}
-                        onOk={this.handleOk}
-                        okText={'Submit'}
-                        onCancel={this.handleCancel}
+            <Divider plain={true}>Workers</Divider>
+            <List
+                style={{height: '70vh'}}
+                itemLayout="horizontal"
+                dataSource={this.props.data.filter(
+                    (worker, index, arr) =>
+                        index < this.state.currWorkerPage * manager.workersPageSize &&
+                        index > this.state.currWorkerPage * manager.workersPageSize - manager.workersPageSize - 1 ? worker : false
+                )}
+                renderItem={item => (
+                    <List.Item
+                        key={item.workerId}
+                        actions={[<a onClick={() => this.showDrawer(item)}>View Info</a>]}
                     >
-                        <this.NewWorkerReduxForm/>
-                    </Modal>
-                    {
-                        this.state.drawerObject && <Drawer
-                            width={640}
-                            placement="right"
-                            closable={false}
-                            onClose={this.onClose}
-                            visible={this.state.drawerVisible}
-                        >
-                            <Row align={'middle'}>
-                                <Col span={8} offset={-4}>
-                                    <Title level={2}>User Profile</Title>
-                                </Col>
-                                <Col span={2} offset={10}>
-                                    <Button danger onClick={this.submitWorkerRemoving}>Remove worker</Button>
-                                </Col>
-                            </Row>
-                            <Divider orientation='left'>Personal</Divider>
-                            <RowDrawer title1={"Name"} title2={"Residence"}
-                                       content1={this.state.drawerObject.name} content2={this.state.drawerObject.residence}
-                                       onChangeMethod1={this.modifyName} onChangeMethod2={this.modifyResidence}
-                            />
-                            <RowDrawer title1={"Surname"} title2={"Number"}
-                                       content1={this.state.drawerObject.surname} content2={this.state.drawerObject.number}
-                                       onChangeMethod1={this.modifySurname} onChangeMethod2={this.modifyNumber}
-                            />
-                            <RowDrawer title1={"Middle name"} title2={"Position"}
-                                       content1={this.state.drawerObject.middlename} content2={this.state.drawerObject.position}
-                                       onChangeMethod1={this.modifyMiddleName} onChangeMethod2={this.modifyPosition}
-                            />
-                            <Row>
-                                <Col span={12}>
-                                    <Row>
-                                        <Col span={8}>
-                                            <div style={{textAlign: 'right'}}>
-                                                Birthday :
-                                            </div>
-                                        </Col>
-                                        <Col span={16}>
-                                            <div style={{textAlign: 'center'}}>
-                                                <DatePicker onChange={this.modifyBirthday} defaultValue={moment(this.state.drawerObject.birthday, 'YYYY-MM-DD')} />
-                                            </div>
-                                        </Col>
-                                    </Row>
-                                </Col>
-                                <Col span={12}>
-                                    <Row>
-                                        <Col span={8}>
-                                            <div style={{textAlign: 'right'}}>
-                                                Sex :
-                                            </div>
-                                        </Col>
-                                        <Col span={16}>
-                                            <div style={{textAlign: 'center'}}>
-                                                <Radio.Group onChange={this.modifySex} value={this.state.drawerObject.sex}>
-                                                    <Radio value={'f'}>female</Radio>
-                                                    <Radio value={'m'}>male</Radio>
-                                                </Radio.Group>
-                                            </div>
-                                        </Col>
-                                    </Row>
-                                </Col>
-                            </Row>
-                            <Divider orientation='left'>Account</Divider>
-                            <RowDrawer title1={"Login"} title2={"Password"}
-                                       content1={this.state.drawerObject.login} content2={this.state.drawerObject.password}
-                                       onChangeMethod1={this.modifyLogin} onChangeMethod2={this.modifyPassword}
-                            />
-                            <br/>
-                            <br/>
-                            <Row>
-                                <Col span={24}>
-                                    <Button onClick={this.submitWorkerChanges}>Submit Change</Button>
-                                </Col>
-                            </Row>
-                            <Divider/>
-                        </Drawer>
-                    }
+                        <List.Item.Meta
+                            avatar={
+                                <Avatar size={'large'} icon={<UserOutlined/>}/>
+                            }
+                            title={item.fullName}
+                            description={item.position}
+                        />
+                    </List.Item>
+                )}
+            />
+            <Row>
+                <Col span={12}>
+                    <Pagination
+                        style={{float: 'left'}}
+                        defaultCurrent={1}
+                        total={this.props.schoolWorkersCount}
+                        pageSize={manager.workersPageSize}
+                        onChange={this.pageChanges}
+                        hideOnSinglePage
+                    />
+                </Col>
+                <Col span={12}>
+                    <Button style={{float: 'right'}} onClick={this.showModal}>Add worker</Button>
                 </Col>
             </Row>
+
+
+            <Modal
+                title="Basic Modal"
+                visible={this.state.modalVisible}
+                onOk={this.handleOk}
+                okText={'Submit'}
+                onCancel={this.handleCancel}
+            >
+                <this.NewWorkerReduxForm/>
+            </Modal>
+            {
+                this.state.drawerObject && <Drawer
+                    width={640}
+                    placement="right"
+                    closable={false}
+                    onClose={this.onClose}
+                    visible={this.state.drawerVisible}
+                >
+                    <Row align={'middle'}>
+                        <Col span={12}>
+                            <Title style={{float: 'left'}} level={2}>User Profile</Title>
+                        </Col>
+                        <Col span={12}>
+                            <Button style={{float: 'right'}} danger onClick={this.submitWorkerRemoving}>Remove
+                                worker</Button>
+                        </Col>
+                    </Row>
+                    <Divider orientation='left'>Personal</Divider>
+                    <RowDrawer title1={"Name"} title2={"Residence"}
+                               content1={this.state.drawerObject.name}
+                               content2={this.state.drawerObject.residence}
+                               onChangeMethod={this.UpdateDrawerWorker}
+                    />
+                    <RowDrawer title1={"Surname"} title2={"Number"}
+                               content1={this.state.drawerObject.surname}
+                               content2={this.state.drawerObject.number}
+                               onChangeMethod={this.UpdateDrawerWorker}
+                    />
+                    <RowDrawer title1={"Middle name"} title2={"Position"}
+                               content1={this.state.drawerObject.middlename}
+                               content2={this.state.drawerObject.position}
+                               onChangeMethod={this.UpdateDrawerWorker}
+                    />
+                    <Row>
+                        <Col span={12}>
+                            <Row>
+                                <Col span={8}>
+                                    <div style={{textAlign: 'right'}}>
+                                        Birthday :
+                                    </div>
+                                </Col>
+                                <Col span={16}>
+                                    <div style={{textAlign: 'center'}}>
+                                        <DatePicker
+                                            onChange={
+                                                (momentValue, dataString) => this.UpdateDrawerWorker({type: 'Birthday', value: dataString})
+                                            }
+                                            value={moment(this.state.drawerObject.birthday, 'YYYY-MM-DD')}/>
+                                    </div>
+                                </Col>
+                            </Row>
+                        </Col>
+                        <Col span={12}>
+                            <Row>
+                                <Col span={8}>
+                                    <div style={{textAlign: 'right'}}>
+                                        Sex :
+                                    </div>
+                                </Col>
+                                <Col span={16}>
+                                    <div style={{textAlign: 'center'}}>
+                                        <Radio.Group value={this.state.drawerObject.sex}
+                                                     onChange={e => this.UpdateDrawerWorker({type: 'Sex', value: e.target.value})}
+                                        >
+                                            <Radio value={'f'}>female</Radio>
+                                            <Radio value={'m'}>male</Radio>
+                                        </Radio.Group>
+                                    </div>
+                                </Col>
+                            </Row>
+                        </Col>
+                    </Row>
+                    <Divider orientation='left'>Account</Divider>
+                    <RowDrawer title1={"Login"} title2={"Password"}
+                               content1={this.state.drawerObject.login}
+                               content2={this.state.drawerObject.password}
+                               onChangeMethod={this.UpdateDrawerWorker}
+                    />
+                    <br/>
+                    <br/>
+                    <Row>
+                        <Col span={24}>
+                            <Button onClick={this.submitWorkerChanges}>Submit Change</Button>
+                        </Col>
+                    </Row>
+                    <Divider/>
+                </Drawer>
+            }
         </div>
     }
 }

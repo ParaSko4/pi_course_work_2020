@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import {Field, reduxForm} from 'redux-form';
 import 'antd/dist/antd.css';
-import {Divider, Col, Button, Form, Row, Layout} from 'antd';
+import {Divider, Button, Layout} from 'antd';
 import {TextField} from "redux-form-antd";
 import {requiredMes} from "../../utils/validators/common-validations";
 import styles from "../../AppComponent.module.css";
@@ -10,15 +10,20 @@ const { Content, Footer } = Layout;
 
 let required = requiredMes('Require filed')
 
+const formItemLayout = {
+    labelCol: {span: 6},
+    wrapperCol: {span: 14},
+};
+
 const LoginForm = (props) => {
     return <form onSubmit={props.handleSubmit}>
-        <Field
+        <Field {...formItemLayout}
             label="Login" name="login"
             component={TextField}
             validate={[required]}
             placeholder="enter your login"
         />
-        <Field
+        <Field {...formItemLayout}
             label="Password" name="password"
             component={TextField}
             validate={[required]}
@@ -69,7 +74,7 @@ const RegistrationForm = (props) => {
             Register you school!
         </Button>
         <Button style={{margin: '0 0 0 20px'}} type="primary" onClick={() => props.setReg(false)}>
-            Back
+            Cancel
         </Button>
     </form>
 }
@@ -86,15 +91,15 @@ const Login = (props) => {
     }
 
     return <Layout className={styles.siteLayout}>
-        <Content style={{ margin: '24px 16px 0', overflow: 'initial' }}>
-            {/*<BreadcrumbContainer />*/}
-            <div className={styles.siteLayoutBackground} style={{padding: 24, minHeight: '80vh'}}>
+        <Content style={{ margin: '24px 16px 0 0', overflow: 'initial' }}>
+            <div className={styles.siteLayoutBackground}
+                 style={{padding: 24, minHeight: '80vh', textAlign:'center'}}>
                 {
                     !isReg && <>
                         <Divider>Login in app</Divider>
                         <div style={{
-                            width: '300px',
-                            margin: 'auto'
+                            width: '20%',
+                            margin: '10% 0 0 40%'
                         }}>
                             <LoginReduxForm onSubmit={props.onSubmitLogin} setReg={setReg}/>
                         </div>
@@ -103,7 +108,7 @@ const Login = (props) => {
                         <Divider>Registration in app</Divider>
                         <div style={{
                             width: '360px',
-                            margin: 'auto'
+                            margin: '7% 0 0 38%'
                         }}>
                             {console.log(props)}
                             <RegistrationReduxForm onSubmit={regSubmit} setReg={setReg}/>

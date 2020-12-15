@@ -7,9 +7,9 @@ let initialState = {
 }
 
 const appReducer = (state = initialState, action) => {
-    switch (action.type){
+    switch (action.type) {
         case SUCCESS_INITIALIZING_APP:
-            return{
+            return {
                 ...state,
                 isInitializing: true
             }
@@ -18,12 +18,14 @@ const appReducer = (state = initialState, action) => {
     }
 }
 
-export const initializaingSuccess = () => ({type: SUCCESS_INITIALIZING_APP})
-export const startInitializingApp = () => (dispatch) => {
-    let promise = dispatch(getAuthUserData())
+export const initializingSuccess = () => ({type: SUCCESS_INITIALIZING_APP})
 
-    Promise.all([promise]).then(() => {
-            dispatch(initializaingSuccess())
+export const startInitializingApp = () => (dispatch) => {
+    let promise = []
+    promise.push(dispatch(getAuthUserData()))
+
+    Promise.all(promise).then(() => {
+            dispatch(initializingSuccess())
         }
     )
 }

@@ -1,6 +1,11 @@
 import {apiAccount as apiAccoun, apiAccount, apiAnon} from "../api/api_course_work";
 import {message} from "antd";
-import {initializaingSuccess} from "./app-reducer";
+import {logoutTeacher} from "./teacher-reducer";
+import {logoutStudent} from "./student-reducer";
+import {logoutStatic} from "./statistic-reducer";
+import {logoutSetting} from "./setting-reducer";
+import {logoutManager} from "./manager-reducer";
+import {logoutClass} from "./class-reducer";
 
 const SET_USER_DATA = 'auth/SET_USER_DATA'
 const LOGOUT_FROM_APP = 'auth/LOGOUT_FROM_APP'
@@ -47,23 +52,12 @@ export const getAuthUserData = () => async (dispatch) => {
     if (response.result === 0) {
         dispatch(setUserData(response.userData.userId, response.userData.name, response.userData.role, response.userData.schoolId))
     }
-
 }
 export const loginInApp = (login, password) => async (dispatch) => {
-    let promise = message.loading({ content: 'Loading...', messageLoaderKey, duration:	1 });
     let response = await apiAnon.login(login, password)
 
     if (response.result === 0) {
-        let response = await apiAccount.getUserInfo()
-
-        if (response.result === 0) {
-            dispatch(setUserData(response.userData.userId, response.userData.name, response.userData.role, response.userData.schoolId))
-
-            Promise.all([promise]).then(() => {
-                    message.success({ content: 'Welcome to Course Work', messageLoaderKey, duration:	2 });
-                }
-            )
-        }
+        dispatch(getAuthUserData())
     }else{
         message.error({ content: response.error, messageLoaderKey, duration:	2 })
     }
@@ -82,6 +76,12 @@ export const exitFromApp = () => async (dispatch) => {
 
     if (response.result === 0) {
         dispatch(logoutFromApp())
+        dispatch(logoutTeacher())
+        dispatch(logoutStudent())
+        dispatch(logoutStatic())
+        dispatch(logoutSetting())
+        dispatch(logoutManager())
+        dispatch(logoutClass())
     }
 }
 
